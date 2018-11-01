@@ -3,6 +3,22 @@
    1. 使用数据可初始化迭代器做input pipline
    2. 边训练边验证
       每个epoch起止可以通过捕捉OutOfRange异常来界定
+   
+   测试可初始化迭代器功能：
+   经测试，得出以下结论：
+   1.  可分别为训练集与验证集创建不同的可初始化迭代器，两个迭代器相互独立，
+       当迭代器抛出OutOfRange异常，再次run初始化，即可重指数据集的开头，因为两个迭代器相互独立，无法
+       同时接入计算图，所以只能使用feed_dict给数据
+
+   2.  若tf.data.Dataset不调用repeat函数时，对数据集进行迭代，迭代完所有样本，即一个
+       epoch，会抛出OutOfRange异常，捕捉此异常可以界定每个epoch的起止
+
+   3.  若使用batch函数，每次迭代会产生batchsize个样本，迭代到最后，不足batchsize个样本，
+       则剩余的样本会一并输出，下一次迭代会抛出OutOfRange异常
+
+   4.  若使用shuffle函数，当buffer_size=1时，相当于没有起到shuffle作用，buffer_size的大小
+       会影响shuffle的打乱程度，同时，一个epoch内，每个样本都会有且只出现一次，不会有某些样本会重复
+       出现的情况
 
 '''
 
