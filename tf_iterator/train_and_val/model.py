@@ -39,6 +39,7 @@ def inference(images):
         pool2 = max_pool_2x2(conv2)
 
     with tf.variable_scope('flatten'):
+        # reshape中使用-1，表示自动推断计算出的
         flatten = tf.reshape(pool2, [-1, 7*7*64])
 
     with tf.variable_scope('fc1'):
