@@ -17,9 +17,16 @@
     3. 若使用batch函数，每次迭代会产生batchsize个样本，迭代到最后，不足batchsize个样本，
        则剩余的样本会一并输出，下一次迭代会抛出OutOfRange异常
 
-    4. 若使用shuffle函数，当buffer_size=1时，相当于没有起到shuffle作用，buffer_size的大小
-       会影响shuffle的打乱程度，同时，一个epoch内，每个样本都会有且只出现一次，不会有某些样本会重复
-       出现的情况
+    4. 若使用tf.data.Dataset.shuffle()函数（类似tf.train.shuffle_batch()函数），buffer_size的大小会影响shuffle的打乱程度，
+       同时，一个epoch内，每个样本都会有且只出现一次，不会有某些样本会重复出现的情况.
+       shuffle实现原理为：
+              一般数据集比较大，无法直接全部载入内存，所以无法一次性shuffle全部数据，只能维护一个固定大小(buffer_size)的buffer,
+       取batch数据的时候，是从buffer随机选择batch数据（实际是一个一个取数据组成batch）然后，从磁盘中读取数据填充buffer，从上面的分析可以发现
+       buffer_size的大小会影响shuffle的打乱程度，如果buffer_size的大小比全部数据集大小还大，则会得到一个均匀分布的随机性，若
+       buffer_size=1, 则相当于没有shuffle。
+
+    5. 函数tf.data.Dataset.prefetch()，使用生产者-消费者模型，维护一个buffe_size大小的buffer，overlap掉读数据以及计算的耗时
+       函数tf.data.Dataset.map()参数num_parallel_calls,表示并行处理的样本数
 
 '''
 
