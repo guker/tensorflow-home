@@ -59,7 +59,7 @@ class KNeighborsClassifier(object):
          self._fit_y = None
          self._input_dim = None
          self._n_classes = None
-         self._predict_proda = False
+         self._predict_proba = False
 
          if not isinstance(n_neighbors, int):
              raise TypeError('n neighbors must be an integer')
@@ -123,7 +123,7 @@ class KNeighborsClassifier(object):
              return proba
          return prediction
 
-     def _predict_proba(self, X):
+     def predict_proba(self, X):
          self._predict_proba = True
          y_pred = self._predict(X)
          self._predict_proba = False
