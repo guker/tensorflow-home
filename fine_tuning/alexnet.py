@@ -95,7 +95,9 @@ class AlexNet(object):
 
             # Check if the layer is one of the layers that should be reinitialized
             if op_name not in self.SKIP_LAYER:
-
+                # 这里reuse=True，表明名称空间的下的可以复用变量
+                # 当tf.variable_scope函数使用reuse=Ture生成上下文管理时，在这个上下文管理器内
+                # 所有的tf.get_variable函数会直接获取已经创建的变量，如果变量不存在，则会报错
                 with tf.variable_scope(op_name, reuse=True):
 
                     # Loop over list of weights/biases and assign them to their corresponding tf variable
