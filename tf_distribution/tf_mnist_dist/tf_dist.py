@@ -87,6 +87,7 @@ def main(unused_argv):
     kill_ps_queue = create_done_queue(num_worker)
 
     server = tf.train.Server(cluster, job_name=FLAGS.job_name, task_index=FLAGS.task_index)
+    print(server.target)
     if FLAGS.job_name == 'ps':
         # server.join()
 
@@ -94,13 +95,15 @@ def main(unused_argv):
             for i in range(num_worker):
                 sess.run(kill_ps_queue.dequeue())
         return
-
+    # worker的主节点(master), 即task_index为0的节点
     is_chief = (FLAGS.task_index == 0)
     if FLAGS.use_gpu:
         worker_device = '/job:worker/task:%d/gpu:%d' % (FLAGS.task_index, FLAGS.gpu_id)
     else:
         worker_device = '/job:worker/task:%d/cpu:0' % FLAGS.task_index
-
+    # 使用tf.train.replica_device_setter将涉及的变量分配到参数服务器上，使用cpu，
+    # 如有多个参数服务器，会把变量进行轮流循环分配，即第一个变量分配到ps1，第二个变量分配到ps2，第三个分配到ps1上，循环进行
+    # 将非变量的操作分配到工作节点上
     with tf.device(tf.train.replica_device_setter(
             worker_device=worker_device,
             ps_device='/job:ps/cpu:0',
@@ -142,9 +145,11 @@ def main(unused_argv):
         if FLAGS.sync_replicas:
             local_init_op = opt.local_step_init_op
             if is_chief:
+                # 所有进行计算的工作节点里一个主工作节点（chief
+                # 主节点负责初始化参数，模型保存，以及概要保存
                 local_init_op = opt.chief_init_op
             ready_for_local_init_op = opt.ready_for_local_init_op
-
+            # 同步训练模式所需的初始令牌，主队列
             chief_queue_runner = opt.get_chief_queue_runner()
             init_token_op = opt.get_init_tokens_op(0)
 
@@ -156,7 +161,10 @@ def main(unused_argv):
         saver = tf.train.Saver()
 
         # train_dir = tempfile.mkdtemp()
-
+        # 创建一个监管程序，用于统计记录训练模型中的信息
+        # 主节点(cheif)负责模型参数初始化工作，此过程中，其他工作节点等待主节点完成初始化工作，一旦初始化完成，便开始训练数据
+        # logdir是保存和加载模型路径，启动就会从该目录下看是否有检查点文件，若有就自动加载
+        # global_step值是所有计算节点共享的
         if FLAGS.sync_replicas:
             sv = tf.train.Supervisor(is_chief=is_chief, logdir=FLAGS.checkpoint,
                                      init_op=init_op, local_init_op=local_init_op,
@@ -169,6 +177,8 @@ def main(unused_argv):
                                      summary_op=summary_op, saver=saver, summary_writer=summary_writer,
                                      global_step=global_step)
 
+        # 创建会话，设置属性
+        # 所有操作默认使用被指定的设置，如果该操作函数没有GPU实现，自动使用cpu设备
         sess_config = tf.ConfigProto(
             allow_soft_placement=True,
             log_device_placement=False,
@@ -179,7 +189,9 @@ def main(unused_argv):
             print('Worker %d: Initailizing session...' % FLAGS.task_index)
         else:
             print('Worker %d: Waiting for session to be initaialized...' % FLAGS.task_index)
-
+        # 主工作节点(chief),task_index为0的节点初始化会话
+        # 其他工作节点等待会话被初始化后进行计算
+        # prepare_or_wait_for_session需要参数初始化完成且主节点准备好，才开始训练
         sess = sv.prepare_or_wait_for_session(server.target, config=sess_config)
         print('Worker %d: Session initialization complete.' % FLAGS.task_index)
 
@@ -190,7 +202,7 @@ def main(unused_argv):
         time_begin = time.time()
 
         print('Training begins @ %f' % time_begin)
-
+        # 执行分布式模型训练
         local_step = 0
 
         while True:
