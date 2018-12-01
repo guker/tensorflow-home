@@ -283,11 +283,11 @@ def main(unused_argv):
         num_epochs = FLAGS.num_epochs
         steps_per_epoch = (len(train_set) // batch_size)
         validation_steps = (len(validation_set) // batch_size)
-
-        model.fit_generator(train_generator, steps_per_epoch=steps_per_epoch, epochs=num_epochs,
+        # fit_generator会返回训练集与验证集的每个epoch的loss以及metric信息
+        hist = model.fit_generator(train_generator, steps_per_epoch=steps_per_epoch, epochs=num_epochs,
                             verbose=1, callbacks=[tb_cb], validation_data=validation_generator,
                             validation_steps=validation_steps)
-
+        
         # 保存模型
         model_path = FLAGS.model_path
         if model_path.endswith('/') or model_path.endswith('\\'):
@@ -324,7 +324,9 @@ def main(unused_argv):
             map += ap
         mauc = 1.0 * mauc / FLAGS.num_classes
         map = 1.0 * map / FLAGS.num_classes
-        result = {'fpr':fprs,
+        result = {'loss':hist.history['loss'],
+                  'val_loss':hist.history['val_loss'],
+                  'fpr':fprs,
                   'tprs':tprs,
                   'cfmt':cfmt.tolist(),
                   'mauc':mauc,
@@ -379,7 +381,7 @@ def main(unused_argv):
         steps_per_epoch = (len(train_set) // batch_size)
         validation_steps = (len(validation_set) // batch_size)
 
-        model.fit_generator(train_generator, steps_per_epoch=steps_per_epoch, epochs=num_epochs,
+        hist = model.fit_generator(train_generator, steps_per_epoch=steps_per_epoch, epochs=num_epochs,
                             verbose=1, callbacks=[tb_cb], validation_data=validation_generator,
                             validation_steps=validation_steps)
 
@@ -420,7 +422,9 @@ def main(unused_argv):
             map += ap
         mauc = 1.0 * mauc / FLAGS.num_classes
         map = 1.0 * map / FLAGS.num_classes
-        result = {'fprs':fprs,
+        result = {'loss':hist.history['loss'],
+                  'val_loss':hist.history['val_loss'],
+                  'fprs':fprs,
                   'tprs':tprs,
                   'cfmt':cfmt.tolist(),
                   'mauc':mauc,
