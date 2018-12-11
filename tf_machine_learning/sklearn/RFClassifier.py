@@ -17,8 +17,6 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import accuracy_score
 import sklearn.utils
 
-
-
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                     datefmt='%a, %d %b %Y %H:%M:%S')
@@ -93,7 +91,7 @@ def train_val_split(df, ratio=0.8, shuffle=False):
     return tra_df, val_df
 
 
-def top_k(y_true, y_pred, label_name,k=1):
+def top_k(y_true, y_pred, label_name, k=1):
     nrows = y_pred.shape[0]
     if k > y_pred.shape[1]:
         return None
@@ -165,7 +163,7 @@ def main():
         try:
             clf = RandomForestClassifier(n_estimators=n_estimators, criterion=criterion, max_depth=max_depth,
                                          min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
-                                         min_weight_fraction_leaf=min_weight_fraction_leaf,max_features=max_features,
+                                         min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features,
                                          max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease,
                                          bootstrap=bootstrap, n_jobs=n_jobs).fit(tra_x, tra_y)
         except Exception as e:
@@ -181,8 +179,8 @@ def main():
 
         cfmt = confusion_matrix(val_y, val_y_pred_label).tolist()
 
-        top1_acc = top_k(val_y,val_y_pred_prob,clf.classes_,k=1)
-        top5_acc = top_k(val_y, val_y_pred_prob,clf.classes_, k=5)
+        top1_acc = top_k(val_y, val_y_pred_prob, clf.classes_, k=1)
+        top5_acc = top_k(val_y, val_y_pred_prob, clf.classes_, k=5)
         fprs = []
         tprs = []
         aucs = []
@@ -191,7 +189,7 @@ def main():
         aps = []
 
         for c in range(len(clf.classes_)):
-            val_y_true_binary = val_y==clf.classes_[c]
+            val_y_true_binary = val_y == clf.classes_[c]
             val_y_pred_binary = val_y_pred_prob[:, c]
             fpr, tpr, thres_roc = roc_curve(val_y_true_binary, val_y_pred_binary, pos_label=1)
             auc = roc_auc_score(val_y_true_binary, val_y_pred_binary)
@@ -247,8 +245,8 @@ def main():
         pfmn_dict['matrixs'] = []
         matrix = {}
         matrix['name'] = '混淆矩阵'
-        matrix['col_name'] =  clf.classes_.tolist()
-        matrix['row_name'] =  clf.classes_.tolist()
+        matrix['col_name'] = clf.classes_.tolist()
+        matrix['row_name'] = clf.classes_.tolist()
         matrix['elements'] = cfmt
         pfmn_dict['matrixs'].append(matrix)
         # 数值型指标
@@ -273,9 +271,9 @@ def main():
         load_model = args.load_model
 
         logging.info('model parameter configure as follow:\n'
-                    'has_label: {}\n'
-                    'label_name: {}\n'
-                    'load_model: {}\n'.format(has_label, label_name, load_model))
+                     'has_label: {}\n'
+                     'label_name: {}\n'
+                     'load_model: {}\n'.format(has_label, label_name, load_model))
         if has_label:
             if label_name is None:
                 try:
@@ -299,7 +297,7 @@ def main():
             except Exception as e:
                 logging.error('Unexpected Error {}'.format(e))
                 exit(0)
-        with open(model_path,'rb') as f:
+        with open(model_path, 'rb') as f:
             clf = pickle.load(f)
         test_y_pred_prob = clf.predict_proba(test_x)
         if has_label:
@@ -310,7 +308,7 @@ def main():
             precisions = []
             aps = []
             for c in range(len(clf.classes_)):
-                test_y_true_binary = test_y==clf.classes_[c]
+                test_y_true_binary = test_y == clf.classes_[c]
                 test_y_pred_binary = test_y_pred_prob[:, c]
                 fpr, tpr, thres_roc = roc_curve(test_y_true_binary, test_y_pred_binary, pos_label=1)
                 auc = roc_auc_score(test_y_true_binary, test_y_pred_binary)
