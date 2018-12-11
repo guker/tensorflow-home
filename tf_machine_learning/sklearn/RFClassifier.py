@@ -53,10 +53,10 @@ parser.add_argument('--max_features', type=float, default=None,
 parser.add_argument('--max_depth', type=int, default=2,
                     help='The maximun depth of the trees')
 
-parser.add_argument('--min_samples_split', type=float, default=0.5,
+parser.add_argument('--min_samples_split', type=int, default=2,
                     help='Ratio, minimun number of samples required to split an internal node')
 
-parser.add_argument('--min_samples_leaf', type=float, default=0.25,
+parser.add_argument('--min_samples_leaf', type=int, default=1,
                     help='Ratio, minimum number of smaples required to be at a leaf node')
 
 parser.add_argument('--min_weight_fraction_leaf', type=float, default=0.0,
