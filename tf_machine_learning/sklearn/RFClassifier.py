@@ -139,7 +139,6 @@ def main():
                      'min_samples_split: {}\n'
                      'min_samples_leaf: {}\n'
                      'min_weight_fraction_leaf: {}\n'
-                     'max_leaf_nodes: {}\n'
                      'min_impurity_decrease: {}\n'
                      'bootstrap: {}\n'
                      'n_jobs: {}'.format(label_name, n_estimators, split_ratio, shuffle, criterion,
