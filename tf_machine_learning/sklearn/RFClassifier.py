@@ -62,9 +62,6 @@ parser.add_argument('--min_samples_leaf', type=float, default=0.25,
 parser.add_argument('--min_weight_fraction_leaf', type=float, default=0.0,
                     help='Ratio, minimum weighted fraction of the sum total of wieights required to be at a leaf node')
 
-parser.add_argument('--max_leaf_nodes', type=int, default=None,
-                    help='Grow trees with max_leaf_nodes in best-first fashion')
-
 parser.add_argument('--min_impurity_decrease', type=float, default=0.0,
                     help='a node will be split if this shplit induces a decrease of the impurity greater than or euqal '
                          'to this vlaue')
@@ -127,7 +124,6 @@ def main():
         min_samples_split = args.min_samples_split
         min_samples_leaf = args.min_samples_leaf
         min_weight_fraction_leaf = args.min_weight_fraction_leaf
-        max_leaf_nodes = args.max_leaf_nodes
         min_impurity_decrease = args.min_impurity_decrease
         bootstrap = args.bootstrap
         n_jobs = args.n_jobs
@@ -149,7 +145,7 @@ def main():
                      'n_jobs: {}'.format(label_name, n_estimators, split_ratio, shuffle, criterion,
                                          max_features, max_depth, min_samples_split,
                                          min_samples_leaf, min_weight_fraction_leaf,
-                                         max_leaf_nodes, min_impurity_decrease, bootstrap, n_jobs))
+                                         min_impurity_decrease, bootstrap, n_jobs))
 
         tra_df, val_df = train_val_split(df, ratio=split_ratio, shuffle=shuffle)
         columns = df.columns.tolist()
@@ -164,7 +160,7 @@ def main():
             clf = RandomForestClassifier(n_estimators=n_estimators, criterion=criterion, max_depth=max_depth,
                                          min_samples_split=min_samples_split, min_samples_leaf=min_samples_leaf,
                                          min_weight_fraction_leaf=min_weight_fraction_leaf, max_features=max_features,
-                                         max_leaf_nodes=max_leaf_nodes, min_impurity_decrease=min_impurity_decrease,
+                                         min_impurity_decrease=min_impurity_decrease,
                                          bootstrap=bootstrap, n_jobs=n_jobs).fit(tra_x, tra_y)
         except Exception as e:
             logging.error("Unexpected Error {}".format(e))
