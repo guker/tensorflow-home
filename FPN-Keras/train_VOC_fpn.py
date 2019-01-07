@@ -229,7 +229,7 @@ elif init_with == "last":
 # which layers to train by name pattern.
 model.train(dataset_train, dataset_val,
             learning_rate=config.LEARNING_RATE,
-            epochs=10,
+            epochs=100,
             layers='heads')
 
 # Training - Stage 2
@@ -237,13 +237,13 @@ model.train(dataset_train, dataset_val,
 print("Training Resnet layer 4+")
 model.train(dataset_train, dataset_val,
             learning_rate=config.LEARNING_RATE / 10,
-            epochs=16,
+            epochs=160,
             layers='4+')
 
 # Training - Stage 3
 # Finetune layers from ResNet stage 3 and up
 print("Training Resnet layer 3+")
 model.train(dataset_train, dataset_val,
-            learning_rate=config.LEARNING_RATE / 10,
-            epochs=100,
+            learning_rate=config.LEARNING_RATE / 100,
+            epochs=200,
             layers='all')
