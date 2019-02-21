@@ -5,7 +5,7 @@
 
 ![figure](./multithread.jpg)
 
-从图1中可以看出，这个多线程程序的Wall time，![](http://latex.codecogs.com/gif.latex?\ t_{wall}=P/3+S) $ t_{wall}=P/3+S $ 。它的CPU time， $ t_{cpu}=P+S $ 。容易知道，如果使用一个线程， $ t_{wall} = t_{cpu}=P+S $ 。用户使用3个线程需要等待的时间（即wall time）和使用一个线程需要等待的时间之比为(P+S)/ (P/3+S)<3 。这也就是使用3个线程带来的加速比。
+从图1中可以看出，这个多线程程序的Wall time，![](http://latex.codecogs.com/gif.latex?\\t_{wall}=P/3+S) $ t_{wall}=P/3+S $ 。它的CPU time， $ t_{cpu}=P+S $ 。容易知道，如果使用一个线程， $ t_{wall} = t_{cpu}=P+S $ 。用户使用3个线程需要等待的时间（即wall time）和使用一个线程需要等待的时间之比为(P+S)/ (P/3+S)<3 。这也就是使用3个线程带来的加速比。
 
 推广一下这个结论。假设程序可并行的部分是 a , 不可并行或者串行的部分 1-a ，那么用户使用 n 个线程带来的加速比是 1/(1-a+a/n) 。当 n 趋向无穷大时，加速比趋近于1/(1-a) 。可以看到，一个程序的串行部分决定了加速比的上限。这就是著名的Amdahl's law。
 
